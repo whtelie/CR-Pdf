@@ -13,7 +13,8 @@ struct SavedView: View {
     @StateObject private var imagePickerService = ImagePickerService()
 
     @State private var isImporterPresented = false
-    @State private var isShowPhotoPicker = false
+    @State private var isPhotoPickerPresented = false
+    @State private var isFilePickerPresented = false
     
     init(viewModel: SavedViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -33,8 +34,11 @@ struct SavedView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
-                        Button(action: { isShowPhotoPicker = true }) {
+                        Button(action: { isPhotoPickerPresented = true }) {
                             Label("Add photo", systemImage: "plus")
+                        }
+                        Button(action: { isFilePickerPresented = true }) {
+                            Label("Add photo from file", systemImage: "plus")
                         }
                         Button(action: { isImporterPresented = true }) {
                             Label("Add PDF", systemImage: "plus")
@@ -60,7 +64,14 @@ struct SavedView: View {
         ) { result in
             handleFileImport(result)
         }
-        .sheet(isPresented: $isShowPhotoPicker) {
+        .fileImporter(
+                    isPresented: $isFilePickerPresented,
+                    allowedContentTypes: [.image],
+                    allowsMultipleSelection: true
+        ) { result in
+            handleImageFileImport(result)
+        }
+        .sheet(isPresented: $isPhotoPickerPresented) {
             ImagePickerView(service: imagePickerService)
         }
         .onAppear {
@@ -81,6 +92,17 @@ struct SavedView: View {
             }
         case .failure(let error):
             viewModel.errorMessage = "Error selecting PDF: \(error.localizedDescription)"
+        }
+    }
+    
+    private func handleImageFileImport(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            Task {
+                await viewModel.createPDFFromImageURLs(urls, fileName: "")
+            }
+        case .failure(let error):
+            viewModel.errorMessage = "Error selecting images: \(error.localizedDescription)"
         }
     }
 }

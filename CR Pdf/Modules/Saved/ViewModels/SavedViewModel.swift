@@ -74,7 +74,7 @@ final class SavedViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     self.addDocument(from: pdfURL)
                     
-                    // Временный файл кдаляем
+                    // Временный файл удаляем
                     try? FileManager.default.removeItem(at: pdfURL)
                     
                     self.isCreatingPDF = false
@@ -85,6 +85,30 @@ final class SavedViewModel: ObservableObject {
                     self.isCreatingPDF = false
                 }
             }
+        }
+    }
+    
+    func createPDFFromImageURLs(_ urls: [URL], fileName: String) async {
+        guard !urls.isEmpty else {
+            errorMessage = "No image files selected"
+            return
+        }
+        
+        isCreatingPDF = true
+        errorMessage = nil
+        
+        let finalFileName = fileName.isEmpty ? "PDF_\(Date().formatted(date: .abbreviated, time: .shortened))" : fileName
+        
+        if let pdfURL = await PDFCreator.createPDFFromURLs(urls, fileName: finalFileName) {
+            self.addDocument(from: pdfURL)
+            
+            // Очищаем временный файл
+            try? FileManager.default.removeItem(at: pdfURL)
+            
+            self.isCreatingPDF = false
+        } else {
+            self.errorMessage = "Failed to create PDF from image files"
+            self.isCreatingPDF = false
         }
     }
     
