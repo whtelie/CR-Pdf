@@ -11,6 +11,8 @@ import SwiftUI
 struct DocumentListView: View {
     @ObservedObject var viewModel: SavedViewModel
     
+    
+    
     var body: some View {
         Group {
             if viewModel.documents.isEmpty {
@@ -18,10 +20,25 @@ struct DocumentListView: View {
             } else {
                 List {
                     ForEach(viewModel.documents) { document in
-                        NavigationLink(destination: PDFViewer(document: document)) {
+                        ZStack {
                             DocumentRowView(document: document)
+                                .contextMenu {
+                                    Button {
+                                        viewModel.sharePDF(document)
+                                    } label: {
+                                        Label("Share", systemImage: "square.and.arrow.up")
+                                    }
+                                    Button {
+                                        viewModel.deleteDocument(document)
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
+                            NavigationLink(destination: PDFViewer(document: document)) {
+                                EmptyView()
+                            }
+                            .opacity(0)
                         }
-                        //                        DocumentRowView(document: document)
                         .swipeActions {
                             Button(role: .destructive) {
                                 viewModel.deleteDocument(document)
@@ -33,6 +50,11 @@ struct DocumentListView: View {
                     .onDelete(perform: viewModel.deleteDocuments)
                 }
                 .listStyle(.plain)
+            }
+        }
+        .sheet(isPresented: $viewModel.isShareSheetPresented) {
+            if let url = viewModel.shareURL {
+                ActivityView(activityItems: [url])
             }
         }
     }

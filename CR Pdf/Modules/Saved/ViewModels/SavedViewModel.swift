@@ -15,6 +15,9 @@ final class SavedViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var isCreatingPDF = false
     
+    @Published var shareURL: URL?
+    @Published var isShareSheetPresented = false
+    
     private let repository: DocumentRepository
     private var cancellables = Set<AnyCancellable>()
     
@@ -110,6 +113,18 @@ final class SavedViewModel: ObservableObject {
         } else {
             self.errorMessage = "Failed to create PDF from image files"
             self.isCreatingPDF = false
+        }
+    }
+    
+    func sharePDF(_ document: DocumentModel) {
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(document.name ?? "document").pdf")
+        do {
+            try document.pdfData.write(to: tempURL)
+            shareURL = tempURL
+            isShareSheetPresented = true
+        } catch {
+            print("Cant share document: \(error)")
         }
     }
     
