@@ -37,7 +37,7 @@ struct SavedView: View {
                         ProgressView("Loading documents...")
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
-                        DocumentListView(viewModel: viewModel)
+                        DocumentListView(viewModel: viewModel, repository: viewModel.repository)
                     }
                 }
                 VStack {

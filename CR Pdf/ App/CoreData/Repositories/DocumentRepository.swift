@@ -10,11 +10,12 @@ import Foundation
 import CoreData
 import PDFKit
 
-protocol DocumentRepository {
+public protocol DocumentRepository {
     func fetchAllDocuments() throws -> [DocumentModel]
     func saveDocument(from url: URL) throws -> DocumentModel
     func deleteDocument(_ document: DocumentModel) throws
     func getDocumentCount() -> Int
+    func update(_ document: DocumentModel, with pdfData: Data) throws
 }
 
 class CoreDataDocumentRepository: DocumentRepository {
@@ -70,6 +71,20 @@ class CoreDataDocumentRepository: DocumentRepository {
         
 //        coreDataDocument.deleteFile()
         context.delete(coreDataDocument)
+        try context.save()
+    }
+    
+    func update(_ document: DocumentModel, with pdfData: Data) throws {
+        let request: NSFetchRequest<Document> = Document.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", document.id as CVarArg)
+        
+        guard let coreDataDocument = try context.fetch(request).first else {
+            throw DocumentError.documentNotFound
+        }
+        
+        coreDataDocument.pdfData = pdfData
+        coreDataDocument.thumbnailData = generateThumbnail(from: pdfData)
+        
         try context.save()
     }
     

@@ -18,7 +18,9 @@ final class SavedViewModel: ObservableObject {
     @Published var shareURL: URL?
     @Published var isShareSheetPresented = false
     
-    private let repository: DocumentRepository
+    @Published var selectedDocumentForEditing: DocumentModel? = nil
+    
+    let repository: DocumentRepository
     private var cancellables = Set<AnyCancellable>()
     
     init(repository: DocumentRepository) {
