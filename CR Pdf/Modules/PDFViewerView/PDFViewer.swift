@@ -13,8 +13,11 @@ struct PDFViewer: View {
     let document: DocumentModel
 
     var body: some View {
-        PDFKitView(data: document.pdfData)
-            .navigationTitle(document.name)
+        VStack(alignment: .center) {
+            Text(document.name)
+                .font(.title)
+            PDFKitView(data: document.pdfData)
+        }
     }
 }
 
@@ -24,6 +27,7 @@ struct PDFKitView: UIViewRepresentable {
     func makeUIView(context: Context) -> PDFView {
         let pdfView = PDFView()
         pdfView.autoScales = true
+        pdfView.backgroundColor = .clear
         pdfView.document = PDFDocument(data: data)
         return pdfView
     }

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+import Combine
 
 struct SavedView: View {
     @StateObject private var viewModel: SavedViewModel
@@ -16,19 +17,61 @@ struct SavedView: View {
     @State private var isPhotoPickerPresented = false
     @State private var isFilePickerPresented = false
     
+    @State private var isFileNameSheetPresented = false
+    @State private var newFileName: String = ""
+    @State private var pendingImageURLs: [URL] = []
+    @State private var pendingPhotos: [UIImage] = []
+    
+    @State private var keyboardHeight: CGFloat = 0
+
+    
     init(viewModel: SavedViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
     }
     
     var body: some View {
         NavigationView {
-            VStack {
-                if viewModel.isLoading {
-                    ProgressView("Loading documents...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    DocumentListView(viewModel: viewModel)
+            ZStack {
+                VStack {
+                    if viewModel.isLoading {
+                        ProgressView("Loading documents...")
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        DocumentListView(viewModel: viewModel)
+                    }
                 }
+                VStack {
+                    Spacer()
+                    if isFileNameSheetPresented {
+                        Color.black.opacity(0.3)
+                            .ignoresSafeArea()
+                            .onTapGesture {
+                                isFileNameSheetPresented = false
+                            }
+                        FileNameInputBottomSheet(fileName: $newFileName) {
+                            isFileNameSheetPresented = false
+                            Task {
+                                if !pendingImageURLs.isEmpty {
+                                    await viewModel.createPDFFromImageURLs(pendingImageURLs, fileName: newFileName)
+                                    pendingImageURLs = []
+                                } else if !pendingPhotos.isEmpty {
+                                    viewModel.createPDFFromPhotos(pendingPhotos, fileName: newFileName)
+                                    pendingPhotos = []
+                                }
+                            }
+                        } onCancel: {
+                            isFileNameSheetPresented = false
+                            pendingImageURLs = []
+                            pendingPhotos = []
+                        }
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .animation(.spring(), value: isFileNameSheetPresented)
+                        .ignoresSafeArea()
+                    }
+                }
+            }
+            .onReceive(KeyboardHeightHelper.keyboardHeight) { height in
+                keyboardHeight = height
             }
             .navigationTitle("Saved PDF documents")
             .toolbar {
@@ -42,10 +85,6 @@ struct SavedView: View {
                             Label("Add document from file", systemImage: "plus")
                         }
                         .disabled(viewModel.isLoading)
-//                        Button(action: { isImporterPresented = true }) {
-//                            Label("Add PDF", systemImage: "plus")
-//                        }
-//                        .disabled(viewModel.isLoading)
                     } label: {
                         Label("Add", systemImage: "plus")
                     }
@@ -59,13 +98,6 @@ struct SavedView: View {
                 }
             }
         }
-//        .fileImporter(
-//            isPresented: $isImporterPresented,
-//            allowedContentTypes: [.pdf],
-//            allowsMultipleSelection: false
-//        ) { result in
-//            handleFileImport(result)
-//        }
         .fileImporter(
             isPresented: $isFilePickerPresented,
             allowedContentTypes: [.image],
@@ -75,7 +107,7 @@ struct SavedView: View {
         }
         .sheet(isPresented: $isPhotoPickerPresented) {
             ImagePickerView(service: imagePickerService) { images in
-                viewModel.createPDFFromPhotos(images, fileName: "")
+                handlePhotosSelected(images)
                 imagePickerService.reset()
             }
         }
@@ -98,11 +130,17 @@ struct SavedView: View {
     private func handleImageFileImport(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
-            Task {
-                await viewModel.createPDFFromImageURLs(urls, fileName: "")
-            }
+            pendingImageURLs = urls
+            newFileName = ""
+            isFileNameSheetPresented = true
         case .failure(let error):
             viewModel.errorMessage = "Error selecting images: \(error.localizedDescription)"
         }
+    }
+    
+    private func handlePhotosSelected(_ images: [UIImage]) {
+        pendingPhotos = images
+        newFileName = ""
+        isFileNameSheetPresented = true
     }
 }
