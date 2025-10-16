@@ -112,19 +112,23 @@ struct MainView: View {
         
     }
     private var mainContent: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 24) {
-                ForEach(viewModel.sections) { section in
-                    if !section.documents.isEmpty {
-                        SectionView(
-                            section: section,
-                            viewModel: viewModel
-                        )
+        if viewModel.sections.count > 1 && viewModel.sections[1].documents.isEmpty {
+            AnyView(EmptyStateView())
+        } else {
+            AnyView(ScrollView {
+                LazyVStack(alignment: .leading, spacing: 24) {
+                    ForEach(viewModel.sections) { section in
+                        if !section.documents.isEmpty {
+                            SectionView(
+                                section: section,
+                                viewModel: viewModel
+                            )
+                        }
+                        
                     }
-                    
                 }
-            }
-            .padding()
+                .padding()
+            })
         }
     }
 }
