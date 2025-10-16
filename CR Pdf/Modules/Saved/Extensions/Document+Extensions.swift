@@ -14,7 +14,8 @@ extension Document {
         guard let id = id,
               let name = name,
               let creationDate = creationDate,
-              let pdfData = pdfData else {
+              let pdfData = pdfData,
+              let thumbnailData = thumbnailData else {
             throw DocumentError.invalidDocument
         }
         
@@ -31,7 +32,8 @@ extension Document {
             creationDate: creationDate,
             pdfData: pdfData,
             fileSize: calculatedFileSize ?? "Unknown size",
-            pageCount: PDFDocument(data: pdfData)?.pageCount
+            pageCount: PDFDocument(data: pdfData)?.pageCount,
+            thumbnail: UIImage(data: thumbnailData)
         )
     }
     
@@ -45,6 +47,4 @@ extension Document {
         self.fileSize = ByteCountFormatter.string(fromByteCount: Int64(data.count), countStyle: .file)
         self.pageCount = NSNumber(value: PDFDocument(data: data)?.pageCount ?? 0)
     }
-    
-    
 }

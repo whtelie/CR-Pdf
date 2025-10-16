@@ -20,5 +20,6 @@ extension Document {
     @NSManaged public var pdfData: Data?
     @NSManaged public var fileSize: String?
     @NSManaged public var pageCount: NSNumber?
+    @NSManaged public var thumbnailData: Data?
 
 }

@@ -14,9 +14,20 @@ struct DocumentRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Image(systemName: "doc.fill")
-                    .foregroundColor(.red)
-                    .font(.title3)
+                Group {
+                    if let image = document.thumbnail {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 50, height: 70)
+                            .cornerRadius(8)
+                            .shadow(radius: 2)
+                    } else {
+                        Image(systemName: "doc.fill")
+                            .foregroundColor(.red)
+                            .font(.title3)
+                    }
+                }
                 
                 Text(document.name)
                     .font(.headline)

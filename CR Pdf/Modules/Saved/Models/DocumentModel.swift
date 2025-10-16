@@ -7,6 +7,7 @@
 
 
 import Foundation
+import UIKit
 
 struct DocumentModel: Identifiable, Equatable {
     let id: UUID
@@ -15,6 +16,7 @@ struct DocumentModel: Identifiable, Equatable {
     let pdfData: Data
     let fileSize: String
     let pageCount: Int?
+    let thumbnail: UIImage?
     
     var formattedDate: String {
         let formatter = DateFormatter()

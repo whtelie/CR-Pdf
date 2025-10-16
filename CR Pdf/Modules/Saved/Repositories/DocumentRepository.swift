@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreData
+import PDFKit
 
 protocol DocumentRepository {
     func fetchAllDocuments() throws -> [DocumentModel]
@@ -51,6 +52,9 @@ class CoreDataDocumentRepository: DocumentRepository {
         
         let data = try Data(contentsOf: url)
         document.pdfData = data
+        
+        document.thumbnailData = generateThumbnail(from: data)
+        
         try context.save()
         
         return try document.toDomainModel()
@@ -72,5 +76,36 @@ class CoreDataDocumentRepository: DocumentRepository {
     func getDocumentCount() -> Int {
         let request: NSFetchRequest<Document> = Document.fetchRequest()
         return (try? context.count(for: request)) ?? 0
+    }
+}
+
+extension CoreDataDocumentRepository {
+    private func generateThumbnail(from pdfData: Data, scale: CGFloat = 0.2) -> Data? {
+        guard let pdfDocument = PDFDocument(data: pdfData),
+              let page = pdfDocument.page(at: 0) else { return nil }
+        
+        let pageRect = page.bounds(for: .mediaBox)
+        let thumbnailSize = CGSize(width: pageRect.width * scale, height: pageRect.height * scale)
+        
+        UIGraphicsBeginImageContextWithOptions(thumbnailSize, false, 0)
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        
+        context.setFillColor(UIColor.white.cgColor)
+        context.fill(CGRect(origin: .zero, size: thumbnailSize))
+        
+        context.translateBy(x: 0, y: thumbnailSize.height)
+        context.scaleBy(x: 1.0, y: -1.0)
+        
+        let scaleX = thumbnailSize.width / pageRect.width
+        let scaleY = thumbnailSize.height / pageRect.height
+        context.saveGState()
+        context.scaleBy(x: scaleX, y: scaleY)
+        page.draw(with: .mediaBox, to: context)
+        context.restoreGState()
+        
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return image?.jpegData(compressionQuality: 0.8)
     }
 }
