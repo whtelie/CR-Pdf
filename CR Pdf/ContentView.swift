@@ -12,9 +12,9 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            Text("Home")
+            MainModule.makeView(context: viewContext)
                 .tabItem {
-                    Label("Home", systemImage: "home")
+                    Label("Home", systemImage: "house.fill")
                 }
             SavedModule.makeView(context: viewContext)
                 .tabItem {

@@ -51,6 +51,7 @@ class CoreDataDocumentRepository: DocumentRepository {
         document.id = UUID()
         document.creationDate = Date()
         document.name = url.deletingPathExtension().lastPathComponent
+        document.isLiked = false
         
         let data = try Data(contentsOf: url)
         document.pdfData = data

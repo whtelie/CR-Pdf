@@ -21,5 +21,6 @@ extension Document {
     @NSManaged public var fileSize: String?
     @NSManaged public var pageCount: NSNumber?
     @NSManaged public var thumbnailData: Data?
+    @NSManaged public var isLiked: Bool
 
 }

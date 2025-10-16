@@ -8,14 +8,14 @@
 
 import Foundation
 
-enum DocumentError: Error, LocalizedError {
+public enum DocumentError: Error, LocalizedError {
     case documentNotFound
     case fileAccessDenied
     case invalidDocument
     case fileCopyFailed
     case invalidURL
     
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .documentNotFound:
             return "Document not found"

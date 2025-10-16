@@ -39,7 +39,8 @@ extension Document {
             pdfData: pdfData,
             fileSize: calculatedFileSize ?? "Unknown size",
             pageCount: PDFDocument(data: pdfData)?.pageCount,
-            thumbnail: thumbnailImage
+            thumbnail: thumbnailImage,
+            isLiked: isLiked
         )
     }
     

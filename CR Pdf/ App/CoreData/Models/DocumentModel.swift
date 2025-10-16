@@ -18,6 +18,7 @@ public struct DocumentModel: Identifiable, Equatable {
     let fileSize: String
     let pageCount: Int?
     let thumbnail: UIImage?
+    let isLiked: Bool
     
     var calculatedFileSize: String {
         ByteCountFormatter.string(fromByteCount: Int64(pdfData.count), countStyle: .file)
@@ -25,6 +26,11 @@ public struct DocumentModel: Identifiable, Equatable {
       
     var calculatedPageCount: Int {
         PDFDocument(data: pdfData)?.pageCount ?? 0
+    }
+    
+    var isRecent: Bool {
+        let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+        return creationDate > weekAgo
     }
     
     var formattedDate: String {
