@@ -10,7 +10,10 @@ import UniformTypeIdentifiers
 
 struct SavedView: View {
     @StateObject private var viewModel: SavedViewModel
+    @StateObject private var imagePickerService = ImagePickerService()
+
     @State private var isImporterPresented = false
+    @State private var isShowPhotoPicker = false
     
     init(viewModel: SavedViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -29,10 +32,17 @@ struct SavedView: View {
             .navigationTitle("Saved PDF documents")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { isImporterPresented = true }) {
-                        Label("Add PDF", systemImage: "plus")
+                    Menu {
+                        Button(action: { isShowPhotoPicker = true }) {
+                            Label("Add photo", systemImage: "plus")
+                        }
+                        Button(action: { isImporterPresented = true }) {
+                            Label("Add PDF", systemImage: "plus")
+                        }
+                        .disabled(viewModel.isLoading)
+                    } label: {
+                        Label("Add", systemImage: "plus")
                     }
-                    .disabled(viewModel.isLoading)
                 }
             }
             .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
@@ -50,8 +60,16 @@ struct SavedView: View {
         ) { result in
             handleFileImport(result)
         }
+        .sheet(isPresented: $isShowPhotoPicker) {
+            ImagePickerView(service: imagePickerService)
+        }
         .onAppear {
             viewModel.loadDocuments()
+        }
+        .onReceive(imagePickerService.$selectedImages) { newImages in
+            guard !newImages.isEmpty else { return }
+            viewModel.createPDFFromPhotos(newImages, fileName: "")
+            imagePickerService.reset()
         }
     }
     

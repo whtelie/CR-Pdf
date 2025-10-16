@@ -20,7 +20,7 @@ enum PDFCreator {
                 pdfDocument.insert(pdfPage, at: i)
             }
         }
-        //TODO: разобраться с удалением временного файла
+
         guard pdfDocument.write(to: pdfURL) else {
             return nil
         }

@@ -7,11 +7,13 @@
 
 import Foundation
 import Combine
+import UIKit
 
 final class SavedViewModel: ObservableObject {
     @Published var documents: [DocumentModel] = []
     @Published var errorMessage: String?
     @Published var isLoading = false
+    @Published var isCreatingPDF = false
     
     private let repository: DocumentRepository
     private var cancellables = Set<AnyCancellable>()
@@ -51,6 +53,38 @@ final class SavedViewModel: ObservableObject {
         } catch {
             errorMessage = "Error saving PDF: \(error.localizedDescription)"
             isLoading = false
+        }
+    }
+    
+    func createPDFFromPhotos(_ images: [UIImage], fileName: String) {
+        guard !images.isEmpty else {
+            errorMessage = "You must select at least one photo to create a PDF."
+            return
+        }
+        
+        isCreatingPDF = true
+        errorMessage = nil
+        
+        let finalFileName = fileName.isEmpty ? "PDF_\(Date().formatted(date: .abbreviated, time: .shortened))" : fileName
+        
+        DispatchQueue.global().async {
+//            guard let self = self else { return }
+            
+            if let pdfURL = PDFCreator.createPDF(from: images, fileName: finalFileName) {
+                DispatchQueue.main.async {
+                    self.addDocument(from: pdfURL)
+                    
+                    // Временный файл кдаляем
+                    try? FileManager.default.removeItem(at: pdfURL)
+                    
+                    self.isCreatingPDF = false
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Failed to create PDF from photos"
+                    self.isCreatingPDF = false
+                }
+            }
         }
     }
     
