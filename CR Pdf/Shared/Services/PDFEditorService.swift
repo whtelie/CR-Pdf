@@ -11,6 +11,23 @@ import PDFKit
 import UIKit
 
 final class PDFEditorService {
+    func rotatePage(at index: Int, in data: Data) throws -> Data {
+        guard let pdf = PDFDocument(data: data) else {
+            throw PDFEditorError.invalidPDFData
+        }
+        
+        if let page = pdf.page(at: index) {
+            let currentRotation = page.rotation
+            page.rotation = (currentRotation + 90) % 360
+        }
+        
+        guard let rotatedData = pdf.dataRepresentation() else {
+            throw PDFEditorError.failedToGenerateData
+        }
+        
+        return rotatedData
+    }
+    
     func rotateAllPages(in data: Data) throws -> Data {
         guard let pdf = PDFDocument(data: data) else {
             throw PDFEditorError.invalidPDFData

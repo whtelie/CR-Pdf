@@ -68,8 +68,14 @@ struct PDFEditorView: View {
                             
                             Spacer()
                             
+                            Button(role: .none) {
+                                viewModel.rotatePage(at: index)
+                            } label: {
+                                Image(systemName: "arrow.trianglehead.clockwise")
+                            }
+                            .padding(.horizontal, 6)
                             Button(role: .destructive) {
-                                viewModel.removePage(at: index)
+                                viewModel.removePage(at: index + 1)
                             } label: {
                                 Image(systemName: "trash")
                             }

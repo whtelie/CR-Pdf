@@ -62,6 +62,7 @@ struct DocumentListView: View {
                     }
                     .onDelete(perform: viewModel.deleteDocuments)
                 }
+                .listRowSeparator(.hidden)
                 .listStyle(.plain)
             }
         }

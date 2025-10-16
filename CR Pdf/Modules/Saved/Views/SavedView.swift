@@ -49,16 +49,16 @@ struct SavedView: View {
                                 isFileNameSheetPresented = false
                             }
                         FileNameInputBottomSheet(fileName: $newFileName) {
-                            isFileNameSheetPresented = false
                             Task {
                                 if !pendingImageURLs.isEmpty {
                                     await viewModel.createPDFFromImageURLs(pendingImageURLs, fileName: newFileName)
                                     pendingImageURLs = []
                                 } else if !pendingPhotos.isEmpty {
-                                    viewModel.createPDFFromPhotos(pendingPhotos, fileName: newFileName)
+                                    await viewModel.createPDFFromPhotos(pendingPhotos, fileName: newFileName)
                                     pendingPhotos = []
                                 }
                             }
+                            isFileNameSheetPresented = false
                         } onCancel: {
                             isFileNameSheetPresented = false
                             pendingImageURLs = []

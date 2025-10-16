@@ -20,18 +20,24 @@ struct FileNameInputBottomSheet: View {
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal)
             HStack {
-                Button("Cancel", action: onCancel)
-                    .foregroundColor(.red)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(.regularMaterial)
-                    .cornerRadius(12)
-                Button("Save", action: onSave)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .cornerRadius(12)
+                Button(action: onCancel) {
+                    Text("Cancel")
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(12)
+                }
+                .buttonStyle(.plain)
+                Button(action: onSave) {
+                    Text("Save")
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .cornerRadius(12)
+                }
+                .buttonStyle(.plain)
             }
             .padding(.horizontal)
             .padding(.bottom, 16)

@@ -62,7 +62,7 @@ final class SavedViewModel: ObservableObject {
         }
     }
     
-    func createPDFFromPhotos(_ images: [UIImage], fileName: String) {
+    func createPDFFromPhotos(_ images: [UIImage], fileName: String) async {
         guard !images.isEmpty else {
             errorMessage = "You must select at least one photo to create a PDF."
             return

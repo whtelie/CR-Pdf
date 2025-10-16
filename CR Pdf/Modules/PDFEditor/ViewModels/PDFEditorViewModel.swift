@@ -60,6 +60,26 @@ final class PDFEditorViewModel: ObservableObject {
         }
     }
     
+    func rotatePage(at index: Int) {
+        isProcessing = true
+        errorMessage = nil
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            do {
+                let data = try self.pdfEditor.rotatePage(at: index, in: self.editedPDFData ?? self.document.pdfData)
+                DispatchQueue.main.async {
+                    self.editedPDFData = data
+                    self.isProcessing = false
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Failed to rotate page: \(error.localizedDescription)"
+                    self.isProcessing = false
+                }
+            }
+        }
+    }
+    
     func removePage(at index: Int) {
         isProcessing = true
         errorMessage = nil

@@ -28,29 +28,31 @@ struct DocumentRowView: View {
                             .font(.title3)
                     }
                 }
+                .padding(.trailing, 5)
                 
-                Text(document.name)
-                    .font(.headline)
-                    .lineLimit(1)
-                
-                Spacer()
-                
-                VStack {
-                    Text(document.formattedDate)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(document.name)
+                        .font(.system(.headline, design: .rounded))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
                     
-                    Text(document.fileSize)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
-            }
-            
-            HStack {
-                if let pageCount = document.pageCount {
-                    Text("\(pageCount) pages")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
+//                    Spacer()
+                    
+                    HStack {
+                        if let pageCount = document.pageCount {
+                            Text("\(pageCount) pages")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Text(document.formattedDate)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Text(document.fileSize)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 
                 Spacer()
