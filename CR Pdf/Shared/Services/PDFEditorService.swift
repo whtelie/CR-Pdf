@@ -74,6 +74,27 @@ final class PDFEditorService {
         
         return page.thumbnail(of: size, for: .cropBox)
     }
+    
+    func mergePDFs(_ pdfDataArray: [Data]) throws -> Data {
+        let mergedPDF = PDFDocument()
+        var pageIndex = 0
+
+        for data in pdfDataArray {
+            guard let pdf = PDFDocument(data: data) else { continue }
+            for i in 0..<pdf.pageCount {
+                if let page = pdf.page(at: i) {
+                    mergedPDF.insert(page, at: pageIndex)
+                    pageIndex += 1
+                }
+            }
+        }
+
+        guard let data = mergedPDF.dataRepresentation() else {
+            throw PDFEditorError.failedToGenerateData
+        }
+
+        return data
+    }
 }
 
 enum PDFEditorError: Error {

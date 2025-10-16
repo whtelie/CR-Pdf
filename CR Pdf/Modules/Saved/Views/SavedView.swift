@@ -38,6 +38,53 @@ struct SavedView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         DocumentListView(viewModel: viewModel, repository: viewModel.repository)
+                        
+                        if viewModel.isSelectionMode {
+                            VStack(spacing: 12) {
+                                Divider()
+                                
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text("Selection Mode")
+                                            .font(.headline)
+                                        Text("\(viewModel.selectedDocuments.count) documents selected")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Button("Cancel") {
+                                        viewModel.cancelSelection()
+                                    }
+                                    .foregroundColor(.red)
+                                    
+                                    Button {
+                                        viewModel.mergeSelectedDocuments()
+                                    } label: {
+                                        HStack {
+                                            Image(systemName: "doc.on.doc")
+                                            Text("Merge")
+                                        }
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 8)
+                                        .background(
+                                            viewModel.selectedDocuments.count >= 2
+                                            ? Color.blue
+                                            : Color.gray
+                                        )
+                                        .cornerRadius(8)
+                                    }
+                                    .disabled(viewModel.selectedDocuments.count < 2)
+                                }
+                                .padding(.horizontal)
+                                .padding(.bottom, 8)
+                            }
+                            .padding(.bottom, 16)
+                            .background(Color(.systemBackground))
+                            .transition(.move(edge: .bottom))
+                        }
                     }
                 }
                 VStack {

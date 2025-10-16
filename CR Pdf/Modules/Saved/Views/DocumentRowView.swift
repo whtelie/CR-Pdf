@@ -10,6 +10,8 @@ import SwiftUI
 
 struct DocumentRowView: View {
     let document: DocumentModel
+    let isSelected: Bool
+    let isSelectionMode: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -35,8 +37,6 @@ struct DocumentRowView: View {
                         .font(.system(.headline, design: .rounded))
                         .foregroundColor(.primary)
                         .lineLimit(1)
-                    
-//                    Spacer()
                     
                     HStack {
                         if let pageCount = document.pageCount {

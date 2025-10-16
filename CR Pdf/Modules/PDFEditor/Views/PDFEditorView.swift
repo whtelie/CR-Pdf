@@ -75,7 +75,7 @@ struct PDFEditorView: View {
                             }
                             .padding(.horizontal, 6)
                             Button(role: .destructive) {
-                                viewModel.removePage(at: index + 1)
+                                viewModel.removePage(at: index)
                             } label: {
                                 Image(systemName: "trash")
                             }

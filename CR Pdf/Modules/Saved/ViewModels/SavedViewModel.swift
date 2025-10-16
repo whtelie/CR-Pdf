@@ -18,6 +18,9 @@ final class SavedViewModel: ObservableObject {
     @Published var shareURL: URL?
     @Published var isShareSheetPresented = false
     
+    @Published var isSelectionMode = false
+    @Published var selectedDocuments: Set<UUID> = []
+    
     @Published var selectedDocumentForEditing: DocumentModel? = nil
     
     let repository: DocumentRepository
@@ -62,19 +65,36 @@ final class SavedViewModel: ObservableObject {
         }
     }
     
+    func saveDocument(from data: Data, name: String) throws -> DocumentModel {
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString).pdf")
+        
+        do {
+            try data.write(to: tempURL)
+            let document = try repository.saveDocument(from: tempURL)
+            try? FileManager.default.removeItem(at: tempURL)
+            return document
+        } catch {
+            try? FileManager.default.removeItem(at: tempURL)
+            throw error
+        }
+    }
+    
     func createPDFFromPhotos(_ images: [UIImage], fileName: String) async {
         guard !images.isEmpty else {
             errorMessage = "You must select at least one photo to create a PDF."
             return
         }
         
-        isCreatingPDF = true
-        errorMessage = nil
+        await MainActor.run {
+            isCreatingPDF = true
+            errorMessage = nil
+        }
         
         let finalFileName = fileName.isEmpty ? "PDF_\(Date().formatted(date: .abbreviated, time: .shortened))" : fileName
         
-        DispatchQueue.global().async {
-//            guard let self = self else { return }
+        DispatchQueue.global().async { [weak self] in
+            guard let self = self else { return }
             
             if let pdfURL = PDFCreator.createPDF(from: images, fileName: finalFileName) {
                 DispatchQueue.main.async {
@@ -116,6 +136,50 @@ final class SavedViewModel: ObservableObject {
             self.errorMessage = "Failed to create PDF from image files"
             self.isCreatingPDF = false
         }
+    }
+    
+    func mergeSelectedDocuments(with name: String? = nil) {
+        let docsToMerge = documents.filter { selectedDocuments.contains($0.id) }
+        guard docsToMerge.count >= 2 else {
+            errorMessage = "Please select at least 2 documents to merge"
+            return
+        }
+
+        Task { [weak self] in
+            guard let self = self else { return }
+            do {
+                let mergedData = try PDFEditorService().mergePDFs(docsToMerge.map(\.pdfData))
+                let mergedName = name ?? "Merged \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
+                let newDocument = try repository.saveDocument(from: mergedData, name: mergedName)
+                
+                await MainActor.run {
+                    self.documents.insert(newDocument, at: 0)
+                    self.cancelSelection()
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = "Failed to merge PDFs: \(error.localizedDescription)"
+                }
+            }
+        }
+        isSelectionMode = false
+    }
+    
+    func toggleSelection(for document: DocumentModel) {
+        if selectedDocuments.contains(document.id) {
+            selectedDocuments.remove(document.id)
+        } else {
+            selectedDocuments.insert(document.id)
+        }
+        
+        if selectedDocuments.isEmpty {
+            isSelectionMode = false
+        }
+    }
+    
+    func cancelSelection() {
+        selectedDocuments.removeAll()
+        isSelectionMode = false
     }
     
     func sharePDF(_ document: DocumentModel) {

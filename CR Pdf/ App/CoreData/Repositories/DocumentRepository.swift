@@ -13,6 +13,7 @@ import PDFKit
 public protocol DocumentRepository {
     func fetchAllDocuments() throws -> [DocumentModel]
     func saveDocument(from url: URL) throws -> DocumentModel
+    func saveDocument(from data: Data, name: String) throws -> DocumentModel
     func deleteDocument(_ document: DocumentModel) throws
     func getDocumentCount() -> Int
     func update(_ document: DocumentModel, with pdfData: Data) throws
@@ -59,6 +60,21 @@ class CoreDataDocumentRepository: DocumentRepository {
         try context.save()
         
         return try document.toDomainModel()
+    }
+    
+    func saveDocument(from data: Data, name: String) throws -> DocumentModel {
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString).pdf")
+        
+        do {
+            try data.write(to: tempURL)
+            let document = try saveDocument(from: tempURL)
+            try? FileManager.default.removeItem(at: tempURL)
+            return document
+        } catch {
+            try? FileManager.default.removeItem(at: tempURL)
+            throw error
+        }
     }
     
     func deleteDocument(_ document: DocumentModel) throws {
