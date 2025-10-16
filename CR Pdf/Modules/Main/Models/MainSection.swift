@@ -12,5 +12,5 @@ public struct MainSection: Identifiable {
     public let id = UUID()
     public let title: String
     public let systemImage: String
-    public let documents: [DocumentModel]
+    public var documents: [DocumentModel]
 }

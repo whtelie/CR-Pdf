@@ -43,6 +43,23 @@ final class MainViewModel: ObservableObject {
         }
     }
     
+    func toggleLike(for document: DocumentModel) {
+        do {
+            let updatedDocument = try repository.toggleLike(document)
+            updateDocumentInSections(updatedDocument)
+        } catch {
+            errorMessage = "Failed to update like status: \(error.localizedDescription)"
+        }
+    }
+    private func updateDocumentInSections(_ updatedDocument: DocumentModel) {
+        for i in 0..<sections.count {
+            if let documentIndex = sections[i].documents.firstIndex(where: { $0.id == updatedDocument.id }) {
+                sections[i].documents[documentIndex] = updatedDocument
+            }
+        }
+        objectWillChange.send()
+    }
+
     private func updateSections(with documents: [DocumentModel]) {
         let likedDocuments = documents.filter { $0.isLiked }
         let recentDocuments = documents.filter { $0.isRecent }

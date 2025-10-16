@@ -20,7 +20,6 @@ struct SectionView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Заголовок секции
             HStack {
                 Image(systemName: section.systemImage)
                     .foregroundColor(.blue)
@@ -46,7 +45,11 @@ struct SectionView: View {
                     let row = DocumentRowView(
                         document: document,
                         isSelected: viewModel.selectedDocuments.contains(document.id),
-                        isSelectionMode: viewModel.isSelectionMode
+                        isSelectionMode: viewModel.isSelectionMode,
+                        onLikeTapped: {
+                            viewModel.toggleLike(for: document)
+                            viewModel.refreshData()
+                        }
                     )
                     .contentShape(Rectangle())
                     

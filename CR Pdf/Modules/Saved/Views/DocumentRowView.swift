@@ -12,6 +12,7 @@ struct DocumentRowView: View {
     let document: DocumentModel
     let isSelected: Bool
     let isSelectionMode: Bool
+    var onLikeTapped: (() -> Void)? = nil
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -56,6 +57,18 @@ struct DocumentRowView: View {
                 }
                 
                 Spacer()
+                
+                HStack(spacing: 8) {
+                    Button(action: {
+                        onLikeTapped?()
+                    }) {
+                        Image(systemName: document.isLiked ? "heart.fill" : "heart")
+                            .foregroundColor(document.isLiked ? .red : .gray)
+                            .font(.system(size: 18))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isSelectionMode)
+                }
             }
         }
         .padding(.vertical, 4)

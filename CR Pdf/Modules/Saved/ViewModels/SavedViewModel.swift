@@ -80,6 +80,15 @@ final class SavedViewModel: ObservableObject {
         }
     }
     
+    func toggleLike(for document: DocumentModel) {
+        do {
+            let updatedDocument = try repository.toggleLike(document)
+            loadDocuments()
+        } catch {
+            errorMessage = "Failed to update like status: \(error.localizedDescription)"
+        }
+    }
+    
     func createPDFFromPhotos(_ images: [UIImage], fileName: String) async {
         guard !images.isEmpty else {
             errorMessage = "You must select at least one photo to create a PDF."

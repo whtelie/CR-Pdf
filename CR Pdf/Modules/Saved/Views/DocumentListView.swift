@@ -49,7 +49,8 @@ struct DocumentListView: View {
                                 DocumentRowView(
                                     document: document,
                                     isSelected: viewModel.selectedDocuments.contains(document.id),
-                                    isSelectionMode: viewModel.isSelectionMode
+                                    isSelectionMode: viewModel.isSelectionMode,
+                                    onLikeTapped: { viewModel.toggleLike(for: document) }
                                 )
                                 .contentShape(Rectangle())
                                 NavigationLink(

@@ -29,8 +29,8 @@ public struct DocumentModel: Identifiable, Equatable {
     }
     
     var isRecent: Bool {
-        let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-        return creationDate > weekAgo
+        let threeDaysAgo = Calendar.current.date(byAdding: .day, value: -3, to: Date())!
+        return creationDate > threeDaysAgo
     }
     
     var formattedDate: String {

@@ -17,6 +17,8 @@ public protocol DocumentRepository {
     func deleteDocument(_ document: DocumentModel) throws
     func getDocumentCount() -> Int
     func update(_ document: DocumentModel, with pdfData: Data) throws
+    func toggleLike(_ document: DocumentModel) throws -> DocumentModel
+    
 }
 
 class CoreDataDocumentRepository: DocumentRepository {
@@ -103,6 +105,19 @@ class CoreDataDocumentRepository: DocumentRepository {
         coreDataDocument.thumbnailData = generateThumbnail(from: pdfData)
         
         try context.save()
+    }
+    
+    func toggleLike(_ document: DocumentModel) throws -> DocumentModel {
+        let request: NSFetchRequest<Document> = Document.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", document.id as CVarArg)
+        
+        guard let coreDataDocument = try context.fetch(request).first else {
+            throw DocumentError.documentNotFound
+        }
+        coreDataDocument.isLiked.toggle()
+        try context.save()
+        
+        return try coreDataDocument.toDomainModel()
     }
     
     func getDocumentCount() -> Int {
