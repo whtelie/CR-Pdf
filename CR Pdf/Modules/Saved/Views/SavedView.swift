@@ -78,7 +78,10 @@ struct SavedView: View {
             viewModel.loadDocuments()
         }
         .onReceive(imagePickerService.$selectedImages) { newImages in
-            guard !newImages.isEmpty else { return }
+            guard !newImages.isEmpty else {
+                viewModel.errorMessage = "No images were picked."
+                return
+            }
             viewModel.createPDFFromPhotos(newImages, fileName: "")
             imagePickerService.reset()
         }
