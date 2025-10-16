@@ -27,10 +27,20 @@ class CoreDataDocumentRepository: DocumentRepository {
     
     func fetchAllDocuments() throws -> [DocumentModel] {
         let request: NSFetchRequest<Document> = Document.fetchRequest()
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \Document.creationDate, ascending: false)]
-        
-        let coreDataDocuments = try context.fetch(request)
-        return try coreDataDocuments.map { try $0.toDomainModel() }
+            request.sortDescriptors = [NSSortDescriptor(keyPath: \Document.creationDate, ascending: false)]
+            
+            let coreDataDocuments = try context.fetch(request)
+            var documents: [DocumentModel] = []
+            for coreDataDocument in coreDataDocuments {
+                do {
+                    let documentModel = try coreDataDocument.toDomainModel()
+                    documents.append(documentModel)
+                } catch {
+                    print("Error mapping document: \(error)")
+                    // Можно здесь удалить битый документ?
+                }
+            }
+            return documents
     }
     
     func saveDocument(from url: URL) throws -> DocumentModel {
@@ -39,7 +49,8 @@ class CoreDataDocumentRepository: DocumentRepository {
         document.creationDate = Date()
         document.name = url.deletingPathExtension().lastPathComponent
         
-        try document.copyFile(from: url)
+        let data = try Data(contentsOf: url)
+        document.pdfData = data
         try context.save()
         
         return try document.toDomainModel()
@@ -53,7 +64,7 @@ class CoreDataDocumentRepository: DocumentRepository {
             throw DocumentError.documentNotFound
         }
         
-        coreDataDocument.deleteFile()
+//        coreDataDocument.deleteFile()
         context.delete(coreDataDocument)
         try context.save()
     }

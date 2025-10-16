@@ -12,6 +12,8 @@ struct ImagePickerView: UIViewControllerRepresentable {
     @ObservedObject var service: ImagePickerService
     var selectionLimit: Int = 0
     
+    var onComplete: (([UIImage]) -> Void)? = nil
+    
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var configuration = PHPickerConfiguration()
         configuration.selectionLimit = selectionLimit
@@ -52,6 +54,9 @@ struct ImagePickerView: UIViewControllerRepresentable {
                 }
                 await MainActor.run {
                     parent.service.selectedImages.append(contentsOf: images)
+                    if !images.isEmpty {
+                        parent.onComplete?(images) // <-- вызываем только если есть картинки
+                    }
                 }
             }
         }

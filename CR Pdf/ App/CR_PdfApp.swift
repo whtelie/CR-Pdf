@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import Photos
 
 @main
 struct CR_PdfApp: App {
@@ -16,6 +17,18 @@ struct CR_PdfApp: App {
         WindowGroup {
             ContentView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .task {
+                    let status = await requestPhotoAccess()
+                    print("Photo Library Status: \(status)")
+                }
+        }
+    }
+
+    func requestPhotoAccess() async -> PHAuthorizationStatus {
+        await withCheckedContinuation { continuation in
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+                continuation.resume(returning: status)
+            }
         }
     }
 }

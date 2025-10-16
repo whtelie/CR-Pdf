@@ -35,15 +35,17 @@ struct SavedView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button(action: { isPhotoPickerPresented = true }) {
-                            Label("Add photo", systemImage: "plus")
-                        }
-                        Button(action: { isFilePickerPresented = true }) {
-                            Label("Add photo from file", systemImage: "plus")
-                        }
-                        Button(action: { isImporterPresented = true }) {
-                            Label("Add PDF", systemImage: "plus")
+                            Label("Add document from photo", systemImage: "plus")
                         }
                         .disabled(viewModel.isLoading)
+                        Button(action: { isFilePickerPresented = true }) {
+                            Label("Add document from file", systemImage: "plus")
+                        }
+                        .disabled(viewModel.isLoading)
+//                        Button(action: { isImporterPresented = true }) {
+//                            Label("Add PDF", systemImage: "plus")
+//                        }
+//                        .disabled(viewModel.isLoading)
                     } label: {
                         Label("Add", systemImage: "plus")
                     }
@@ -57,33 +59,28 @@ struct SavedView: View {
                 }
             }
         }
+//        .fileImporter(
+//            isPresented: $isImporterPresented,
+//            allowedContentTypes: [.pdf],
+//            allowsMultipleSelection: false
+//        ) { result in
+//            handleFileImport(result)
+//        }
         .fileImporter(
-            isPresented: $isImporterPresented,
-            allowedContentTypes: [.pdf],
-            allowsMultipleSelection: false
-        ) { result in
-            handleFileImport(result)
-        }
-        .fileImporter(
-                    isPresented: $isFilePickerPresented,
-                    allowedContentTypes: [.image],
-                    allowsMultipleSelection: true
+            isPresented: $isFilePickerPresented,
+            allowedContentTypes: [.image],
+            allowsMultipleSelection: true
         ) { result in
             handleImageFileImport(result)
         }
         .sheet(isPresented: $isPhotoPickerPresented) {
-            ImagePickerView(service: imagePickerService)
+            ImagePickerView(service: imagePickerService) { images in
+                viewModel.createPDFFromPhotos(images, fileName: "")
+                imagePickerService.reset()
+            }
         }
         .onAppear {
             viewModel.loadDocuments()
-        }
-        .onReceive(imagePickerService.$selectedImages) { newImages in
-            guard !newImages.isEmpty else {
-                viewModel.errorMessage = "No images were picked."
-                return
-            }
-            viewModel.createPDFFromPhotos(newImages, fileName: "")
-            imagePickerService.reset()
         }
     }
     

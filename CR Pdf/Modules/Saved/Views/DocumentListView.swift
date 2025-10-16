@@ -18,14 +18,17 @@ struct DocumentListView: View {
             } else {
                 List {
                     ForEach(viewModel.documents) { document in
-                        DocumentRowView(document: document)
-                            .swipeActions {
-                                Button(role: .destructive) {
-                                    viewModel.deleteDocument(document)
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
+                        NavigationLink(destination: PDFViewer(document: document)) {
+                            DocumentRowView(document: document)
+                        }
+                        //                        DocumentRowView(document: document)
+                        .swipeActions {
+                            Button(role: .destructive) {
+                                viewModel.deleteDocument(document)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
                             }
+                        }
                     }
                     .onDelete(perform: viewModel.deleteDocuments)
                 }

@@ -12,7 +12,7 @@ struct DocumentModel: Identifiable, Equatable {
     let id: UUID
     let name: String
     let creationDate: Date
-    let fileURL: URL
+    let pdfData: Data
     let fileSize: String
     let pageCount: Int?
     

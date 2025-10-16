@@ -35,13 +35,14 @@ final class SavedViewModel: ObservableObject {
         }
     }
     
-    func addDocument(from url: URL) {
-        guard url.startAccessingSecurityScopedResource() else {
-            errorMessage = "Cannot access the selected file"
-            return
+    func addDocument(from url: URL, isSecurityScoped: Bool = false) {
+        if isSecurityScoped {
+            guard url.startAccessingSecurityScopedResource() else {
+                errorMessage = "Cannot access the selected file"
+                return
+            }
+            defer { url.stopAccessingSecurityScopedResource() }
         }
-        
-        defer { url.stopAccessingSecurityScopedResource() }
         
         isLoading = true
         errorMessage = nil
@@ -100,7 +101,7 @@ final class SavedViewModel: ObservableObject {
         let finalFileName = fileName.isEmpty ? "PDF_\(Date().formatted(date: .abbreviated, time: .shortened))" : fileName
         
         if let pdfURL = await PDFCreator.createPDFFromURLs(urls, fileName: finalFileName) {
-            self.addDocument(from: pdfURL)
+            self.addDocument(from: pdfURL, isSecurityScoped: false)
             
             // Очищаем временный файл
             try? FileManager.default.removeItem(at: pdfURL)

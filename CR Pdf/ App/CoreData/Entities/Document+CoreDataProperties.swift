@@ -17,7 +17,7 @@ extension Document {
     @NSManaged public var id: UUID?
     @NSManaged public var name: String?
     @NSManaged public var creationDate: Date?
-    @NSManaged public var fileURL: URL?
+    @NSManaged public var pdfData: Data?
     @NSManaged public var fileSize: String?
     @NSManaged public var pageCount: NSNumber?
 
